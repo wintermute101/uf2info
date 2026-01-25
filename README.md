@@ -1,10 +1,12 @@
+```
 Usage: uf2info [OPTIONS] <INPUTFILE> [OUTPUTFILE]
 
 Arguments:
-  <INPUTFILE>   
-  [OUTPUTFILE]  
+  <INPUTFILE>
+  [OUTPUTFILE]
 
 Options:
-  -v, --verbose  
+  -v, --verbose
   -h, --help     Print help
-  -V, --version  Print version
+  -V, --version  Print versionn
+```
