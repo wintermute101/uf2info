@@ -20,6 +20,43 @@ struct Cli {
 struct MemoryRegions{
     regions: Vec<Vec<u32>>
 }
+pub struct ByteSize{
+    size: u32,
+}
+
+impl From<u32> for ByteSize{
+    fn from(value: u32) -> Self {
+        Self { size: value }
+    }
+}
+
+impl std::fmt::Display for ByteSize {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut pow = 0;
+        let mut size = self.size;
+        loop {
+            size >>= 10;
+            if size == 0{
+                break;
+            }
+            pow += 1;
+        }
+        let postfix = match pow{
+            0 => "B",
+            1 => "KiB",
+            2 => "MiB",
+            _ => { pow = 3; "GiB"},
+        };
+
+        if pow == 0{
+            f.write_fmt(format_args!("{}{postfix}", self.size))
+        }
+        else{
+            let b = self.size as f64 / (1_u64 << (pow*10)) as f64;
+            f.write_fmt(format_args!("{b:.2}{postfix}"))
+        }
+    }
+}
 
 impl MemoryRegions {
     fn new() -> Self{
@@ -120,7 +157,7 @@ fn main() -> Result<()> {
 
     let filename = cli.inputfile.to_string_lossy();
 
-    println!("File {}\nInput file size {} bytes\nTotal blocks {total_blocks}\nBinary len {} bytes\nMemory regions {}", filename, total_blocks*512, binary.len(), regions);
+    println!("File {}\nInput file size {}\nTotal blocks {total_blocks}\nBinary len {}\nMemory regions {}", filename, ByteSize::from(total_blocks*512), ByteSize::from(binary.len() as u32), regions);
 
     Ok(())
 }
