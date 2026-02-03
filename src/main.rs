@@ -103,8 +103,6 @@ fn main() -> Result<()> {
 
     let mut total_blocks = 0;
 
-    let mut read_total_blocks = 0;
-
     let output = if let Some(output) = cli.outputfile {
         Some(File::create(output)?)
     } else {
@@ -127,14 +125,19 @@ fn main() -> Result<()> {
 
         let block = Block::from_bytes(&buf).map_err(Error::msg)?;
 
-        if cli.verbose{
-            println!("Block {} flags {:?} target_addr 0x{:X}-0x{:X} data_len {} total_blocks {}", total_blocks, block.flags, block.target_addr, block.target_addr+block.data_len, block.data_len, block.total_blocks);
+        if let Some(ext) = block.extensions(){
+        println!("Extensions");
+            for e in ext{
+                println!("{:?}", e);
+            }
         }
 
-        read_total_blocks = block.total_blocks;
+        if let Some(chk) = block.checksum(){
+            println!("Checksum {:?}", chk);
+        }
 
-        if block.block != total_blocks{
-            eprintln!("Block no {} does not match read blocks no {}", block.block, total_blocks);
+        if cli.verbose{
+            println!("Block {} flags {:X?} target_addr 0x{:X}-0x{:X} data_len {} total_blocks {}", block.block, block.flags, block.target_addr, block.target_addr+block.data_len, block.data_len, block.total_blocks);
         }
 
         binary.extend(&buf[0..(block.data_len as usize)]);
@@ -144,10 +147,6 @@ fn main() -> Result<()> {
         }
 
         total_blocks += 1;
-    }
-
-    if read_total_blocks != total_blocks{
-        eprintln!("Read total blocks {} does not match total blocks in block {}", total_blocks, read_total_blocks);
     }
 
     if let Some(mut output) = output {
